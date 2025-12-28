@@ -29,10 +29,7 @@ func (m *swagger) Register(gGroup gin.IRouter) {
 
 func (m *swagger) SwaggerHandler(isProduction bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if isProduction {
-			apiwrapper.Abort(c, &apiwrapper.APIResponse{Error: errors.New("not allow to access")})
-			return
-		}
+		// Allow Swagger access in all environments
 		docs.SwaggerInfo.Host = strings.ToLower(c.Request.Host)
 		docs.SwaggerInfo.BasePath = "/"
 		c.Next()
