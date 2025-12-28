@@ -4,8 +4,6 @@ import (
 	"strings"
 
 	"github.com/leehai1107/chophimco-server/docs"
-	"github.com/leehai1107/chophimco-server/pkg/apiwrapper"
-	"github.com/leehai1107/chophimco-server/pkg/errors"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
