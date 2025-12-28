@@ -9,10 +9,12 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go mod tidy
 
 # Remove old docs if exists and generate fresh swagger docs
 RUN rm -rf docs && swag init --parseDependency --parseInternal
+
+# Run go mod tidy after docs are generated
+RUN go mod tidy
 
 EXPOSE 8081
 
