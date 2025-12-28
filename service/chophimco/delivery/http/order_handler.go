@@ -23,7 +23,7 @@ type IOrderHandler interface {
 // @Produce json
 // @Param request body request.CreateOrder true "Order information"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/order/create [post]
+// @Router /api/v1/order/create [post]
 func (h *Handler) CreateOrder(ctx *gin.Context) {
 	userIDStr := ctx.GetString("user_id")
 	userID, _ := strconv.Atoi(userIDStr)
@@ -50,7 +50,7 @@ func (h *Handler) CreateOrder(ctx *gin.Context) {
 // @Produce json
 // @Param id path int true "Order ID"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/order/{id} [get]
+// @Router /api/v1/order/{id} [get]
 func (h *Handler) GetOrderByID(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -73,7 +73,7 @@ func (h *Handler) GetOrderByID(ctx *gin.Context) {
 // @Tags order
 // @Produce json
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/order/my-orders [get]
+// @Router /api/v1/order/my-orders [get]
 func (h *Handler) GetMyOrders(ctx *gin.Context) {
 	userIDStr := ctx.GetString("user_id")
 	userID, _ := strconv.Atoi(userIDStr)
@@ -95,7 +95,7 @@ func (h *Handler) GetMyOrders(ctx *gin.Context) {
 // @Produce json
 // @Param request body request.UpdateOrderStatus true "Order status"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/order/status [put]
+// @Router /api/v1/order/status [put]
 func (h *Handler) UpdateOrderStatus(ctx *gin.Context) {
 	var req request.UpdateOrderStatus
 	if err := ctx.ShouldBindJSON(&req); err != nil {

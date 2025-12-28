@@ -22,7 +22,7 @@ type ICartHandler interface {
 // @Tags cart
 // @Produce json
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/cart [get]
+// @Router /api/v1/cart [get]
 func (h *Handler) GetCart(ctx *gin.Context) {
 	userIDStr := ctx.GetString("user_id")
 	userID, _ := strconv.Atoi(userIDStr)
@@ -44,7 +44,7 @@ func (h *Handler) GetCart(ctx *gin.Context) {
 // @Produce json
 // @Param request body request.AddToCart true "Cart item"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/cart/add [post]
+// @Router /api/v1/cart/add [post]
 func (h *Handler) AddToCart(ctx *gin.Context) {
 	userIDStr := ctx.GetString("user_id")
 	userID, _ := strconv.Atoi(userIDStr)
@@ -71,7 +71,7 @@ func (h *Handler) AddToCart(ctx *gin.Context) {
 // @Produce json
 // @Param request body request.UpdateCartItem true "Cart item update"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/cart/update [put]
+// @Router /api/v1/cart/update [put]
 func (h *Handler) UpdateCartItem(ctx *gin.Context) {
 	var req request.UpdateCartItem
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -93,7 +93,7 @@ func (h *Handler) UpdateCartItem(ctx *gin.Context) {
 // @Tags cart
 // @Param id path int true "Cart Item ID"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/cart/{id} [delete]
+// @Router /api/v1/cart/{id} [delete]
 func (h *Handler) RemoveFromCart(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -114,7 +114,7 @@ func (h *Handler) RemoveFromCart(ctx *gin.Context) {
 // @Description Clear all items from cart
 // @Tags cart
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/cart/clear [delete]
+// @Router /api/v1/cart/clear [delete]
 func (h *Handler) ClearCart(ctx *gin.Context) {
 	userIDStr := ctx.GetString("user_id")
 	userID, _ := strconv.Atoi(userIDStr)

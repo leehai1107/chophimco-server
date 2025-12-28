@@ -23,7 +23,7 @@ func NewRouter(handler IHandler) Router {
 
 func (p *routerImpl) Register(r gin.IRouter) {
 	// routes for chophimco service
-	api := r.Group("chophimco/api/v1")
+	api := r.Group("api/v1")
 	{
 		api.GET("/ping", func(c *gin.Context) {
 			apiwrapper.SendSuccess(c, gin.H{

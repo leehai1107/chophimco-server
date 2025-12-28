@@ -27,7 +27,7 @@ type IProductHandler interface {
 // @Tags product
 // @Produce json
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/product/all [get]
+// @Router /api/v1/product/all [get]
 func (h *Handler) GetAllProducts(ctx *gin.Context) {
 	products, err := h.productUsecase.GetAllProducts(ctx)
 	if err != nil {
@@ -46,7 +46,7 @@ func (h *Handler) GetAllProducts(ctx *gin.Context) {
 // @Produce json
 // @Param id path int true "Product ID"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/product/{id} [get]
+// @Router /api/v1/product/{id} [get]
 func (h *Handler) GetProductByID(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -70,7 +70,7 @@ func (h *Handler) GetProductByID(ctx *gin.Context) {
 // @Produce json
 // @Param category_id query int true "Category ID"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/product/category [get]
+// @Router /api/v1/product/category [get]
 func (h *Handler) GetProductsByCategory(ctx *gin.Context) {
 	categoryID, err := strconv.Atoi(ctx.Query("category_id"))
 	if err != nil {
@@ -94,7 +94,7 @@ func (h *Handler) GetProductsByCategory(ctx *gin.Context) {
 // @Produce json
 // @Param brand_id query int true "Brand ID"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/product/brand [get]
+// @Router /api/v1/product/brand [get]
 func (h *Handler) GetProductsByBrand(ctx *gin.Context) {
 	brandID, err := strconv.Atoi(ctx.Query("brand_id"))
 	if err != nil {
@@ -119,7 +119,7 @@ func (h *Handler) GetProductsByBrand(ctx *gin.Context) {
 // @Produce json
 // @Param request body request.CreateProduct true "Product information"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/product/create [post]
+// @Router /api/v1/product/create [post]
 func (h *Handler) CreateProduct(ctx *gin.Context) {
 	var req request.CreateProduct
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -143,7 +143,7 @@ func (h *Handler) CreateProduct(ctx *gin.Context) {
 // @Produce json
 // @Param request body request.UpdateProduct true "Product information"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/product/update [put]
+// @Router /api/v1/product/update [put]
 func (h *Handler) UpdateProduct(ctx *gin.Context) {
 	var req request.UpdateProduct
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -165,7 +165,7 @@ func (h *Handler) UpdateProduct(ctx *gin.Context) {
 // @Tags product
 // @Param id path int true "Product ID"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/product/{id} [delete]
+// @Router /api/v1/product/{id} [delete]
 func (h *Handler) DeleteProduct(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -189,7 +189,7 @@ func (h *Handler) DeleteProduct(ctx *gin.Context) {
 // @Produce json
 // @Param request body request.CreateProductVariant true "Variant information"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/product/variant/create [post]
+// @Router /api/v1/product/variant/create [post]
 func (h *Handler) CreateProductVariant(ctx *gin.Context) {
 	var req request.CreateProductVariant
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -217,7 +217,7 @@ func (h *Handler) CreateProductVariant(ctx *gin.Context) {
 // @Produce json
 // @Param request body request.UpdateProductVariant true "Variant information"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/product/variant/update [put]
+// @Router /api/v1/product/variant/update [put]
 func (h *Handler) UpdateProductVariant(ctx *gin.Context) {
 	var req request.UpdateProductVariant
 	if err := ctx.ShouldBindJSON(&req); err != nil {

@@ -20,7 +20,6 @@ func NewSwagger() *swagger {
 func (m *swagger) Register(gGroup gin.IRouter) {
 	g := gGroup.Group("")
 	{
-		docs.SwaggerInfo.Schemes = []string{"http", "https"}
 		g.GET("/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 }
@@ -30,6 +29,14 @@ func (m *swagger) SwaggerHandler(isProduction bool) gin.HandlerFunc {
 		// Allow Swagger access in all environments
 		docs.SwaggerInfo.Host = strings.ToLower(c.Request.Host)
 		docs.SwaggerInfo.BasePath = "/internal"
+
+		// Detect scheme from request
+		scheme := "http"
+		if c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https" {
+			scheme = "https"
+		}
+		docs.SwaggerInfo.Schemes = []string{scheme}
+
 		c.Next()
 	}
 }

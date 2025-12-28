@@ -20,7 +20,7 @@ type IReviewHandler interface {
 // @Produce json
 // @Param product_id query int true "Product ID"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/review [get]
+// @Router /api/v1/review [get]
 func (h *Handler) GetProductReviews(ctx *gin.Context) {
 	productID, err := strconv.Atoi(ctx.Query("product_id"))
 	if err != nil {
@@ -45,7 +45,7 @@ func (h *Handler) GetProductReviews(ctx *gin.Context) {
 // @Produce json
 // @Param request body request.CreateReview true "Review information"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/review/create [post]
+// @Router /api/v1/review/create [post]
 func (h *Handler) CreateReview(ctx *gin.Context) {
 	userIDStr := ctx.GetString("user_id")
 	userID, _ := strconv.Atoi(userIDStr)

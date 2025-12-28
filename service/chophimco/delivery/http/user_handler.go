@@ -25,7 +25,7 @@ type IUserHandler interface {
 // @Success 200 {object} apiwrapper.APIResponse
 // @Failure 400 {object} apiwrapper.APIResponse
 // @Failure 401 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/user/login [post]
+// @Router /api/v1/user/login [post]
 func (h *Handler) Login(ctx *gin.Context) {
 	var req request.Login
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -53,7 +53,7 @@ func (h *Handler) Login(ctx *gin.Context) {
 // @Success 200 {object} apiwrapper.APIResponse
 // @Failure 400 {object} apiwrapper.APIResponse
 // @Failure 500 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/user/register [post]
+// @Router /api/v1/user/register [post]
 func (h *Handler) Register(ctx *gin.Context) {
 	log := logger.EnhanceWith(ctx)
 
@@ -85,7 +85,7 @@ func (h *Handler) Register(ctx *gin.Context) {
 // @Produce json
 // @Success 200 {object} apiwrapper.APIResponse
 // @Failure 401 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/user/profile [get]
+// @Router /api/v1/user/profile [get]
 func (h *Handler) GetProfile(ctx *gin.Context) {
 	// Get user ID from context (should be set by auth middleware)
 	userIDStr := ctx.GetString("user_id")

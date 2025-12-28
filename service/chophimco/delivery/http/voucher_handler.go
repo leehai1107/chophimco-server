@@ -24,7 +24,7 @@ type IVoucherHandler interface {
 // @Tags voucher
 // @Produce json
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/voucher/all [get]
+// @Router /api/v1/voucher/all [get]
 func (h *Handler) GetAllVouchers(ctx *gin.Context) {
 	vouchers, err := h.voucherUsecase.GetAllVouchers(ctx)
 	if err != nil {
@@ -41,7 +41,7 @@ func (h *Handler) GetAllVouchers(ctx *gin.Context) {
 // @Tags voucher
 // @Produce json
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/voucher/active [get]
+// @Router /api/v1/voucher/active [get]
 func (h *Handler) GetActiveVouchers(ctx *gin.Context) {
 	vouchers, err := h.voucherUsecase.GetActiveVouchers(ctx)
 	if err != nil {
@@ -59,7 +59,7 @@ func (h *Handler) GetActiveVouchers(ctx *gin.Context) {
 // @Produce json
 // @Param code query string true "Voucher code"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/voucher [get]
+// @Router /api/v1/voucher [get]
 func (h *Handler) GetVoucherByCode(ctx *gin.Context) {
 	code := ctx.Query("code")
 	if code == "" {
@@ -84,7 +84,7 @@ func (h *Handler) GetVoucherByCode(ctx *gin.Context) {
 // @Produce json
 // @Param request body request.CreateVoucher true "Voucher information"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/voucher/create [post]
+// @Router /api/v1/voucher/create [post]
 func (h *Handler) CreateVoucher(ctx *gin.Context) {
 	var req request.CreateVoucher
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -112,7 +112,7 @@ func (h *Handler) CreateVoucher(ctx *gin.Context) {
 // @Produce json
 // @Param request body request.UpdateVoucher true "Voucher information"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/voucher/update [put]
+// @Router /api/v1/voucher/update [put]
 func (h *Handler) UpdateVoucher(ctx *gin.Context) {
 	var req request.UpdateVoucher
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -134,7 +134,7 @@ func (h *Handler) UpdateVoucher(ctx *gin.Context) {
 // @Tags voucher
 // @Param id path int true "Voucher ID"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/voucher/{id} [delete]
+// @Router /api/v1/voucher/{id} [delete]
 func (h *Handler) DeleteVoucher(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -158,7 +158,7 @@ func (h *Handler) DeleteVoucher(ctx *gin.Context) {
 // @Param code query string true "Voucher code"
 // @Param order_value query number true "Order value"
 // @Success 200 {object} apiwrapper.APIResponse
-// @Router /chophimco/api/v1/voucher/validate [get]
+// @Router /api/v1/voucher/validate [get]
 func (h *Handler) ValidateVoucher(ctx *gin.Context) {
 	code := ctx.Query("code")
 	orderValue, err := strconv.ParseFloat(ctx.Query("order_value"), 64)
