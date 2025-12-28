@@ -29,7 +29,7 @@ func (m *swagger) SwaggerHandler(isProduction bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Allow Swagger access in all environments
 		docs.SwaggerInfo.Host = strings.ToLower(c.Request.Host)
-		docs.SwaggerInfo.BasePath = "/"
+		docs.SwaggerInfo.BasePath = "/internal"
 		c.Next()
 	}
 }
