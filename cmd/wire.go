@@ -109,7 +109,10 @@ func registerService(
 func registerSwaggerHandler(g *gin.Engine) {
 	swaggerAPI := g.Group("/internal/swagger")
 	swag := swagger.NewSwagger()
-	swaggerAPI.Use(swag.SwaggerHandler(config.ServerConfig().Production))
+	swaggerAPI.Use(
+		cors.CorsCfg(config.ServerConfig().CorsProduction),
+		swag.SwaggerHandler(config.ServerConfig().Production),
+	)
 	swag.Register(swaggerAPI)
 }
 
