@@ -18,7 +18,7 @@ CREATE TABLE roles (
     name VARCHAR(50) UNIQUE NOT NULL
 );
 
-INSERT INTO roles (name) VALUES ('admin'), ('customer');
+INSERT INTO roles (name) VALUES ('admin'), ('customer'), ('seller');
 
 -- =======================
 -- 3. USERS
@@ -30,11 +30,30 @@ CREATE TABLE users (
     password_hash TEXT NOT NULL,
     full_name VARCHAR(100),
     phone VARCHAR(20),
+    is_seller_verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- =======================
--- 4. CATEGORIES
+-- 4. SELLER PROFILES
+-- =======================
+CREATE TABLE seller_profiles (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE,
+    shop_name VARCHAR(200) NOT NULL,
+    shop_description TEXT,
+    business_address TEXT,
+    business_phone VARCHAR(20),
+    logo_url TEXT,
+    verification_status VARCHAR(50) DEFAULT 'pending', -- pending, verified, rejected
+    average_rating DECIMAL(3, 2) DEFAULT 0.0,
+    total_sales INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT NOW(),
+    verified_at TIMESTAMP
+);
+
+-- =======================
+-- 5. CATEGORIES
 -- =======================
 CREATE TABLE categories (
     id SERIAL PRIMARY KEY,
@@ -42,7 +61,7 @@ CREATE TABLE categories (
 );
 
 -- =======================
--- 5. BRANDS
+-- 6. BRANDS
 -- =======================
 CREATE TABLE brands (
     id SERIAL PRIMARY KEY,
@@ -50,7 +69,7 @@ CREATE TABLE brands (
 );
 
 -- =======================
--- 6. SWITCHES
+-- 7. SWITCHES
 -- =======================
 CREATE TABLE switches (
     id SERIAL PRIMARY KEY,
@@ -60,21 +79,25 @@ CREATE TABLE switches (
 );
 
 -- =======================
--- 7. PRODUCTS
+-- 8. PRODUCTS
 -- =======================
 CREATE TABLE products (
     id SERIAL PRIMARY KEY,
+    seller_id INT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     name VARCHAR(200) NOT NULL,
     category_id INT REFERENCES categories (id),
     brand_id INT REFERENCES brands (id),
     description TEXT,
     base_price DECIMAL(12, 2) NOT NULL,
+    approval_status VARCHAR(50) DEFAULT 'pending', -- pending, approved, rejected
+    rejection_reason TEXT,
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    approved_at TIMESTAMP
 );
 
 -- =======================
--- 8. PRODUCT VARIANTS
+-- 9. PRODUCT VARIANTS
 -- =======================
 CREATE TABLE product_variants (
     id SERIAL PRIMARY KEY,
@@ -90,7 +113,20 @@ CREATE TABLE product_variants (
 );
 
 -- =======================
--- 9. CARTS
+-- 10. PRODUCT IMAGES
+-- =======================
+CREATE TABLE product_images (
+    id SERIAL PRIMARY KEY,
+    product_id INT NOT NULL REFERENCES products (id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    is_primary BOOLEAN DEFAULT FALSE,
+    display_order INT DEFAULT 0,
+    alt_text VARCHAR(255),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- =======================
+-- 11. CARTS
 -- =======================
 CREATE TABLE carts (
     id SERIAL PRIMARY KEY,
@@ -99,7 +135,7 @@ CREATE TABLE carts (
 );
 
 -- =======================
--- 10. CART ITEMS
+-- 12. CART ITEMS
 -- =======================
 CREATE TABLE cart_items (
     id SERIAL PRIMARY KEY,
@@ -110,7 +146,7 @@ CREATE TABLE cart_items (
 );
 
 -- =======================
--- 11. VOUCHERS
+-- 13. VOUCHERS
 -- =======================
 CREATE TABLE vouchers (
     id SERIAL PRIMARY KEY,
@@ -130,7 +166,7 @@ CREATE TABLE vouchers (
 );
 
 -- =======================
--- 12. USER VOUCHERS
+-- 14. USER VOUCHERS
 -- =======================
 CREATE TABLE user_vouchers (
     id SERIAL PRIMARY KEY,
@@ -141,7 +177,7 @@ CREATE TABLE user_vouchers (
 );
 
 -- =======================
--- 13. PRODUCT DISCOUNTS
+-- 15. PRODUCT DISCOUNTS
 -- =======================
 CREATE TABLE product_discounts (
     id SERIAL PRIMARY KEY,
@@ -155,7 +191,7 @@ CREATE TABLE product_discounts (
 );
 
 -- =======================
--- 14. ORDERS
+-- 16. ORDERS
 -- =======================
 CREATE TABLE orders (
     id SERIAL PRIMARY KEY,
@@ -169,7 +205,7 @@ CREATE TABLE orders (
 );
 
 -- =======================
--- 15. ORDER ITEMS
+-- 17. ORDER ITEMS
 -- =======================
 CREATE TABLE order_items (
     id SERIAL PRIMARY KEY,
@@ -180,7 +216,7 @@ CREATE TABLE order_items (
 );
 
 -- =======================
--- 16. PAYMENTS
+-- 18. PAYMENTS
 -- =======================
 CREATE TABLE payments (
     id SERIAL PRIMARY KEY,
@@ -191,7 +227,7 @@ CREATE TABLE payments (
 );
 
 -- =======================
--- 17. REVIEWS
+-- 19. PRODUCT REVIEWS
 -- =======================
 CREATE TABLE reviews (
     id SERIAL PRIMARY KEY,
@@ -204,11 +240,37 @@ CREATE TABLE reviews (
 );
 
 -- =======================
--- 18. INDEXES (PERFORMANCE)
+-- 20. SELLER REVIEWS
+-- =======================
+CREATE TABLE seller_reviews (
+    id SERIAL PRIMARY KEY,
+    buyer_id INT NOT NULL REFERENCES users (id),
+    seller_id INT NOT NULL REFERENCES users (id),
+    order_id INT NOT NULL REFERENCES orders (id),
+    rating INT CHECK (rating BETWEEN 1 AND 5),
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE (buyer_id, seller_id, order_id)
+);
+
+-- =======================
+-- 21. INDEXES (PERFORMANCE)
 -- =======================
 CREATE INDEX idx_products_category ON products (category_id);
 
 CREATE INDEX idx_products_brand ON products (brand_id);
+
+CREATE INDEX idx_products_seller ON products (seller_id);
+
+CREATE INDEX idx_products_approval_status ON products (approval_status);
+
+CREATE INDEX idx_seller_profiles_user ON seller_profiles (user_id);
+
+CREATE INDEX idx_seller_profiles_verification ON seller_profiles (verification_status);
+
+CREATE INDEX idx_product_images_product ON product_images (product_id);
+
+CREATE INDEX idx_product_images_primary ON product_images (product_id, is_primary);
 
 CREATE INDEX idx_variants_product ON product_variants (product_id);
 
@@ -227,6 +289,10 @@ CREATE INDEX idx_user_voucher ON user_vouchers (user_id, voucher_id);
 CREATE INDEX idx_product_discount ON product_discounts (product_id);
 
 CREATE INDEX idx_reviews_product ON reviews (product_id);
+
+CREATE INDEX idx_seller_reviews_seller ON seller_reviews (seller_id);
+
+CREATE INDEX idx_seller_reviews_buyer ON seller_reviews (buyer_id);
 
 -- =======================
 -- END OF FILE

@@ -20,6 +20,7 @@ var Module = fx.Provide(
 	provideVoucherRepo,
 	provideReviewRepo,
 	providePaymentRepo,
+	provideSellerRepo,
 
 	// Usecases
 	provideUserUsecase,
@@ -28,6 +29,7 @@ var Module = fx.Provide(
 	provideOrderUsecase,
 	provideVoucherUsecase,
 	provideReviewUsecase,
+	provideSellerUsecase,
 )
 
 func provideRouter(handler http.IHandler) http.Router {
@@ -41,6 +43,7 @@ func provideHandler(
 	orderUsecase usecase.IOrderUsecase,
 	voucherUsecase usecase.IVoucherUsecase,
 	reviewUsecase usecase.IReviewUsecase,
+	sellerUsecase usecase.ISellerUsecase,
 ) http.IHandler {
 	handler := http.NewHandler(
 		userUsecase,
@@ -49,6 +52,7 @@ func provideHandler(
 		orderUsecase,
 		voucherUsecase,
 		reviewUsecase,
+		sellerUsecase,
 	)
 	return handler
 }
@@ -80,6 +84,10 @@ func provideReviewRepo(db *gorm.DB) repository.IReviewRepo {
 
 func providePaymentRepo(db *gorm.DB) repository.IPaymentRepo {
 	return repository.NewPaymentRepo(db)
+}
+
+func provideSellerRepo(db *gorm.DB) repository.ISellerRepository {
+	return repository.NewSellerRepo(db)
 }
 
 // Usecase providers
@@ -114,4 +122,11 @@ func provideVoucherUsecase(repo repository.IVoucherRepo) usecase.IVoucherUsecase
 
 func provideReviewUsecase(reviewRepo repository.IReviewRepo) usecase.IReviewUsecase {
 	return usecase.NewReviewUsecase(reviewRepo)
+}
+
+func provideSellerUsecase(
+	sellerRepo repository.ISellerRepository,
+	userRepo repository.IUserRepo,
+) usecase.ISellerUsecase {
+	return usecase.NewSellerUsecase(sellerRepo, userRepo)
 }

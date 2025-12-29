@@ -100,4 +100,45 @@ func (p *routerImpl) Register(r gin.IRouter) {
 		reviewApi.GET("", p.handler.GetProductReviews)
 		reviewApi.POST("/create", p.handler.CreateReview) // Requires auth
 	}
+
+	// Seller routes
+	sellerApi := api.Group("seller")
+	{
+		// Public seller info
+		sellerApi.GET("/:id", p.handler.GetSellerByID)
+		sellerApi.GET("/reviews", p.handler.GetSellerReviews)
+
+		// Seller profile management (requires seller role)
+		sellerApi.POST("/profile", p.handler.CreateSellerProfile)
+		sellerApi.GET("/profile", p.handler.GetSellerProfile)
+		sellerApi.PUT("/profile", p.handler.UpdateSellerProfile)
+
+		// Seller product management (requires seller role)
+		sellerApi.POST("/product", p.handler.CreateSellerProduct)
+		sellerApi.GET("/product", p.handler.GetSellerProducts)
+		sellerApi.PUT("/product", p.handler.UpdateSellerProduct)
+		sellerApi.DELETE("/product/:id", p.handler.DeleteSellerProduct)
+
+		// Product image management
+		sellerApi.POST("/product/image", p.handler.UploadProductImage)
+		sellerApi.DELETE("/product/image/:id", p.handler.DeleteProductImage)
+		sellerApi.PUT("/product/image/primary", p.handler.SetPrimaryImage)
+
+		// Seller reviews
+		sellerApi.POST("/reviews", p.handler.CreateSellerReview)
+	}
+
+	// Admin routes
+	adminApi := api.Group("admin")
+	{
+		// Seller verification
+		adminApi.GET("/seller/pending", p.handler.GetPendingSellers)
+		adminApi.POST("/seller/verify", p.handler.VerifySeller)
+		adminApi.POST("/seller/reject", p.handler.RejectSeller)
+
+		// Product approval
+		adminApi.GET("/product/pending", p.handler.GetPendingProducts)
+		adminApi.POST("/product/approve", p.handler.ApproveProduct)
+		adminApi.POST("/product/reject", p.handler.RejectProduct)
+	}
 }

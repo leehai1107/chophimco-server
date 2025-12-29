@@ -1,6 +1,7 @@
 package request
 
 type CreateProduct struct {
+	SellerID    int     `json:"seller_id"`
 	Name        string  `json:"name" binding:"required"`
 	CategoryID  *int    `json:"category_id"`
 	BrandID     *int    `json:"brand_id"`

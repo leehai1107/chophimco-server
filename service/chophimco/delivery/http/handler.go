@@ -12,6 +12,7 @@ type IHandler interface {
 	IOrderHandler
 	IVoucherHandler
 	IReviewHandler
+	ISellerHandler
 }
 
 // Handler implements all handler interfaces
@@ -22,6 +23,7 @@ type Handler struct {
 	orderUsecase   usecase.IOrderUsecase
 	voucherUsecase usecase.IVoucherUsecase
 	reviewUsecase  usecase.IReviewUsecase
+	sellerUsecase  usecase.ISellerUsecase
 }
 
 func NewHandler(
@@ -31,6 +33,7 @@ func NewHandler(
 	orderUsecase usecase.IOrderUsecase,
 	voucherUsecase usecase.IVoucherUsecase,
 	reviewUsecase usecase.IReviewUsecase,
+	sellerUsecase usecase.ISellerUsecase,
 ) IHandler {
 	return &Handler{
 		userUsecase:    userUsecase,
@@ -39,5 +42,6 @@ func NewHandler(
 		orderUsecase:   orderUsecase,
 		voucherUsecase: voucherUsecase,
 		reviewUsecase:  reviewUsecase,
+		sellerUsecase:  sellerUsecase,
 	}
 }
