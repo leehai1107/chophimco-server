@@ -118,14 +118,6 @@ func InitPostgresql() {
 		if !userTableExists {
 			logger.Warn("Users table does not exist. This may cause issues with user-related operations.")
 		}
-
-		var walletTableExists bool
-		db.Raw("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'wallets')").Scan(&walletTableExists)
-		logger.Infof("Wallets table exists: %v", walletTableExists)
-
-		if !walletTableExists {
-			logger.Warn("Wallets table does not exist. This may cause issues with wallet-related operations.")
-		}
 	}
 
 	logger.Info("Successfully connected to PostgreSQL database")

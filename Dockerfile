@@ -1,39 +1,22 @@
-# Build stage
-FROM golang:1.23-alpine AS builder
+FROM golang:1.22.0
 
 WORKDIR /usr/src/app
-
-# Install build dependencies
-RUN apk add --no-cache git
 
 # Install swag for swagger documentation generation
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 
-# Copy go mod files
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
 COPY . .
 
-# Generate swagger docs
-RUN swag init --parseDependency --parseInternal
+# Remove old docs if exists and generate fresh swagger docs
+RUN rm -rf docs && swag init --parseDependency --parseInternal
 
-# Build the application
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main .
-
-# Final stage
-FROM alpine:latest
-
-RUN apk --no-cache add ca-certificates
-
-WORKDIR /root/
-
-# Copy binary from builder
-COPY --from=builder /usr/src/app/main .
-COPY --from=builder /usr/src/app/docs ./docs
+# Run go mod tidy after docs are generated
+RUN go mod tidy
 
 EXPOSE 8081
 
-CMD ["./main", "api"]
+CMD ["go", "run", "./main.go", "api"]
 
