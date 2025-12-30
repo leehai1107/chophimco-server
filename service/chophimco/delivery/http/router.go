@@ -46,6 +46,7 @@ func (p *routerImpl) Register(r gin.IRouter) {
 	{
 		userApi.POST("/login", p.handler.Login)
 		userApi.POST("/register", p.handler.Register)
+		userApi.POST("/logout", p.handler.Logout)
 		userApi.GET("/profile", authMiddleware, p.handler.GetProfile) // Protected
 	}
 

@@ -12,6 +12,7 @@ type IUserHandler interface {
 	Login(ctx *gin.Context)
 	Register(ctx *gin.Context)
 	GetProfile(ctx *gin.Context)
+	Logout(ctx *gin.Context)
 }
 
 // Login godoc
@@ -38,6 +39,17 @@ func (h *Handler) Login(ctx *gin.Context) {
 		apiwrapper.SendUnauthorized(ctx, "Login failed")
 		return
 	}
+
+	// Set JWT token in HTTP-only cookie
+	ctx.SetCookie(
+		"jwt_token",    // name
+		response.Token, // value
+		3600*24,        // maxAge in seconds (24 hours)
+		"/",            // path
+		"",             // domain (empty = current domain)
+		false,          // secure (set to true in production with HTTPS)
+		true,           // httpOnly
+	)
 
 	apiwrapper.SendSuccess(ctx, response)
 }
@@ -100,4 +112,26 @@ func (h *Handler) GetProfile(ctx *gin.Context) {
 	}
 
 	apiwrapper.SendSuccess(ctx, profile)
+}
+
+// Logout godoc
+// @Summary User logout
+// @Description Clear JWT token cookie
+// @Tags user
+// @Produce json
+// @Success 200 {object} apiwrapper.APIResponse
+// @Router /api/v1/user/logout [post]
+func (h *Handler) Logout(ctx *gin.Context) {
+	// Clear the JWT cookie
+	ctx.SetCookie(
+		"jwt_token",
+		"",
+		-1, // maxAge -1 deletes the cookie
+		"/",
+		"",
+		false,
+		true,
+	)
+
+	apiwrapper.SendSuccess(ctx, gin.H{"message": "Logged out successfully"})
 }

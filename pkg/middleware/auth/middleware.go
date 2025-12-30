@@ -10,22 +10,25 @@ import (
 // AuthMiddleware verifies JWT token and sets user info in context
 func AuthMiddleware(jwtService IJWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			apiwrapper.SendUnauthorized(c, "authorization header required")
+		// Try to get token from cookie first
+		tokenString, err := c.Cookie("jwt_token")
+		if err != nil || tokenString == "" {
+			// Fallback to Authorization header for backward compatibility
+			authHeader := c.GetHeader("Authorization")
+			if authHeader != "" {
+				parts := strings.Split(authHeader, " ")
+				if len(parts) == 2 && parts[0] == "Bearer" {
+					tokenString = parts[1]
+				}
+			}
+		}
+
+		if tokenString == "" {
+			apiwrapper.SendUnauthorized(c, "authentication required")
 			c.Abort()
 			return
 		}
 
-		// Extract token from "Bearer <token>"
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			apiwrapper.SendUnauthorized(c, "invalid authorization header format")
-			c.Abort()
-			return
-		}
-
-		tokenString := parts[1]
 		claims, err := jwtService.ValidateToken(tokenString)
 		if err != nil {
 			apiwrapper.SendUnauthorized(c, "invalid or expired token")
@@ -45,15 +48,20 @@ func AuthMiddleware(jwtService IJWTService) gin.HandlerFunc {
 // OptionalAuthMiddleware sets user info if token is provided, but doesn't require it
 func OptionalAuthMiddleware(jwtService IJWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.Next()
-			return
+		// Try to get token from cookie first
+		tokenString, err := c.Cookie("jwt_token")
+		if err != nil || tokenString == "" {
+			// Fallback to Authorization header
+			authHeader := c.GetHeader("Authorization")
+			if authHeader != "" {
+				parts := strings.Split(authHeader, " ")
+				if len(parts) == 2 && parts[0] == "Bearer" {
+					tokenString = parts[1]
+				}
+			}
 		}
 
-		parts := strings.Split(authHeader, " ")
-		if len(parts) == 2 && parts[0] == "Bearer" {
-			tokenString := parts[1]
+		if tokenString != "" {
 			claims, err := jwtService.ValidateToken(tokenString)
 			if err == nil {
 				c.Set("user_id", claims.UserID)
