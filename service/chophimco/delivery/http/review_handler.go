@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leehai1107/chophimco-server/pkg/apiwrapper"
+	"github.com/leehai1107/chophimco-server/pkg/middleware/auth"
 	"github.com/leehai1107/chophimco-server/service/chophimco/model/request"
 )
 
@@ -47,8 +48,11 @@ func (h *Handler) GetProductReviews(ctx *gin.Context) {
 // @Success 200 {object} apiwrapper.APIResponse
 // @Router /api/v1/review/create [post]
 func (h *Handler) CreateReview(ctx *gin.Context) {
-	userIDStr := ctx.GetString("user_id")
-	userID, _ := strconv.Atoi(userIDStr)
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 
 	var req request.CreateReview
 	if err := ctx.ShouldBindJSON(&req); err != nil {

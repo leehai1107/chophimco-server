@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/leehai1107/chophimco-server/pkg/logger"
+	"github.com/leehai1107/chophimco-server/pkg/middleware/auth"
 	"github.com/leehai1107/chophimco-server/service/chophimco/model/entity"
 	"github.com/leehai1107/chophimco-server/service/chophimco/model/request"
 	"github.com/leehai1107/chophimco-server/service/chophimco/model/response"
@@ -21,11 +22,12 @@ type IUserUsecase interface {
 }
 
 type userUsecase struct {
-	repo repository.IUserRepo
+	repo       repository.IUserRepo
+	jwtService auth.IJWTService
 }
 
-func NewUserUsecase(repo repository.IUserRepo) IUserUsecase {
-	return &userUsecase{repo: repo}
+func NewUserUsecase(repo repository.IUserRepo, jwtService auth.IJWTService) IUserUsecase {
+	return &userUsecase{repo: repo, jwtService: jwtService}
 }
 
 func (u *userUsecase) Login(ctx context.Context, req request.Login) (*response.LoginResponse, error) {
@@ -43,12 +45,16 @@ func (u *userUsecase) Login(ctx context.Context, req request.Login) (*response.L
 		return nil, errors.New("invalid credentials")
 	}
 
-	// Generate JWT token (placeholder - implement proper JWT)
-	token := "jwt_token_placeholder"
-
+	// Get role name
 	roleName := ""
 	if user.Role != nil {
 		roleName = user.Role.Name
+	}
+
+	// Generate JWT token
+	token, err := u.jwtService.GenerateToken(user.ID, user.Email, roleName)
+	if err != nil {
+		return nil, errors.New("failed to generate token")
 	}
 
 	return &response.LoginResponse{

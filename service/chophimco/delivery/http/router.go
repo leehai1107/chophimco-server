@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leehai1107/chophimco-server/pkg/apiwrapper"
+	"github.com/leehai1107/chophimco-server/pkg/middleware/auth"
 )
 
 type Router interface {
@@ -12,12 +13,14 @@ type Router interface {
 }
 
 type routerImpl struct {
-	handler IHandler
+	handler    IHandler
+	jwtService auth.IJWTService
 }
 
-func NewRouter(handler IHandler) Router {
+func NewRouter(handler IHandler, jwtService auth.IJWTService) Router {
 	return &routerImpl{
-		handler: handler,
+		handler:    handler,
+		jwtService: jwtService,
 	}
 }
 
@@ -33,12 +36,17 @@ func (p *routerImpl) Register(r gin.IRouter) {
 		})
 	}
 
+	// Create auth middleware instance
+	authMiddleware := auth.AuthMiddleware(p.jwtService)
+	adminMiddleware := auth.RoleMiddleware("admin")
+	sellerMiddleware := auth.RoleMiddleware("seller", "admin")
+
 	// User routes
 	userApi := api.Group("user")
 	{
 		userApi.POST("/login", p.handler.Login)
 		userApi.POST("/register", p.handler.Register)
-		userApi.GET("/profile", p.handler.GetProfile) // Requires auth
+		userApi.GET("/profile", authMiddleware, p.handler.GetProfile) // Protected
 	}
 
 	// Product routes
@@ -50,18 +58,18 @@ func (p *routerImpl) Register(r gin.IRouter) {
 		productApi.GET("/category", p.handler.GetProductsByCategory)
 		productApi.GET("/brand", p.handler.GetProductsByBrand)
 
-		// Admin routes
-		productApi.POST("/create", p.handler.CreateProduct)
-		productApi.PUT("/update", p.handler.UpdateProduct)
-		productApi.DELETE("/:id", p.handler.DeleteProduct)
+		// Admin routes (protected)
+		productApi.POST("/create", authMiddleware, adminMiddleware, p.handler.CreateProduct)
+		productApi.PUT("/update", authMiddleware, adminMiddleware, p.handler.UpdateProduct)
+		productApi.DELETE("/:id", authMiddleware, adminMiddleware, p.handler.DeleteProduct)
 
-		// Variant routes
-		productApi.POST("/variant/create", p.handler.CreateProductVariant)
-		productApi.PUT("/variant/update", p.handler.UpdateProductVariant)
+		// Variant routes (admin only)
+		productApi.POST("/variant/create", authMiddleware, adminMiddleware, p.handler.CreateProductVariant)
+		productApi.PUT("/variant/update", authMiddleware, adminMiddleware, p.handler.UpdateProductVariant)
 	}
 
 	// Cart routes (all require authentication)
-	cartApi := api.Group("cart")
+	cartApi := api.Group("cart", authMiddleware)
 	{
 		cartApi.GET("", p.handler.GetCart)
 		cartApi.POST("/add", p.handler.AddToCart)
@@ -70,13 +78,13 @@ func (p *routerImpl) Register(r gin.IRouter) {
 		cartApi.DELETE("/clear", p.handler.ClearCart)
 	}
 
-	// Order routes
-	orderApi := api.Group("order")
+	// Order routes (all require authentication)
+	orderApi := api.Group("order", authMiddleware)
 	{
 		orderApi.POST("/create", p.handler.CreateOrder)
 		orderApi.GET("/:id", p.handler.GetOrderByID)
 		orderApi.GET("/my-orders", p.handler.GetMyOrders)
-		orderApi.PUT("/status", p.handler.UpdateOrderStatus) // Admin only
+		orderApi.PUT("/status", adminMiddleware, p.handler.UpdateOrderStatus) // Admin only
 	}
 
 	// Voucher routes
@@ -87,18 +95,18 @@ func (p *routerImpl) Register(r gin.IRouter) {
 		voucherApi.GET("", p.handler.GetVoucherByCode)
 		voucherApi.GET("/validate", p.handler.ValidateVoucher)
 
-		// Admin routes
-		voucherApi.GET("/all", p.handler.GetAllVouchers)
-		voucherApi.POST("/create", p.handler.CreateVoucher)
-		voucherApi.PUT("/update", p.handler.UpdateVoucher)
-		voucherApi.DELETE("/:id", p.handler.DeleteVoucher)
+		// Admin routes (protected)
+		voucherApi.GET("/all", authMiddleware, adminMiddleware, p.handler.GetAllVouchers)
+		voucherApi.POST("/create", authMiddleware, adminMiddleware, p.handler.CreateVoucher)
+		voucherApi.PUT("/update", authMiddleware, adminMiddleware, p.handler.UpdateVoucher)
+		voucherApi.DELETE("/:id", authMiddleware, adminMiddleware, p.handler.DeleteVoucher)
 	}
 
 	// Review routes
 	reviewApi := api.Group("review")
 	{
 		reviewApi.GET("", p.handler.GetProductReviews)
-		reviewApi.POST("/create", p.handler.CreateReview) // Requires auth
+		reviewApi.POST("/create", authMiddleware, p.handler.CreateReview) // Protected
 	}
 
 	// Seller routes
@@ -108,28 +116,28 @@ func (p *routerImpl) Register(r gin.IRouter) {
 		sellerApi.GET("/:id", p.handler.GetSellerByID)
 		sellerApi.GET("/reviews", p.handler.GetSellerReviews)
 
-		// Seller profile management (requires seller role)
-		sellerApi.POST("/profile", p.handler.CreateSellerProfile)
-		sellerApi.GET("/profile", p.handler.GetSellerProfile)
-		sellerApi.PUT("/profile", p.handler.UpdateSellerProfile)
+		// Seller profile management (requires seller or admin role)
+		sellerApi.POST("/profile", authMiddleware, sellerMiddleware, p.handler.CreateSellerProfile)
+		sellerApi.GET("/profile", authMiddleware, sellerMiddleware, p.handler.GetSellerProfile)
+		sellerApi.PUT("/profile", authMiddleware, sellerMiddleware, p.handler.UpdateSellerProfile)
 
-		// Seller product management (requires seller role)
-		sellerApi.POST("/product", p.handler.CreateSellerProduct)
-		sellerApi.GET("/product", p.handler.GetSellerProducts)
-		sellerApi.PUT("/product", p.handler.UpdateSellerProduct)
-		sellerApi.DELETE("/product/:id", p.handler.DeleteSellerProduct)
+		// Seller product management (requires seller or admin role)
+		sellerApi.POST("/product", authMiddleware, sellerMiddleware, p.handler.CreateSellerProduct)
+		sellerApi.GET("/product", authMiddleware, sellerMiddleware, p.handler.GetSellerProducts)
+		sellerApi.PUT("/product", authMiddleware, sellerMiddleware, p.handler.UpdateSellerProduct)
+		sellerApi.DELETE("/product/:id", authMiddleware, sellerMiddleware, p.handler.DeleteSellerProduct)
 
-		// Product image management
-		sellerApi.POST("/product/image", p.handler.UploadProductImage)
-		sellerApi.DELETE("/product/image/:id", p.handler.DeleteProductImage)
-		sellerApi.PUT("/product/image/primary", p.handler.SetPrimaryImage)
+		// Product image management (requires seller or admin role)
+		sellerApi.POST("/product/image", authMiddleware, sellerMiddleware, p.handler.UploadProductImage)
+		sellerApi.DELETE("/product/image/:id", authMiddleware, sellerMiddleware, p.handler.DeleteProductImage)
+		sellerApi.PUT("/product/image/primary", authMiddleware, sellerMiddleware, p.handler.SetPrimaryImage)
 
-		// Seller reviews
-		sellerApi.POST("/reviews", p.handler.CreateSellerReview)
+		// Seller reviews (requires authentication)
+		sellerApi.POST("/reviews", authMiddleware, p.handler.CreateSellerReview)
 	}
 
-	// Admin routes
-	adminApi := api.Group("admin")
+	// Admin routes (all require admin role)
+	adminApi := api.Group("admin", authMiddleware, adminMiddleware)
 	{
 		// Seller verification
 		adminApi.GET("/seller/pending", p.handler.GetPendingSellers)

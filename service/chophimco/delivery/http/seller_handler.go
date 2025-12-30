@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/leehai1107/chophimco-server/pkg/apiwrapper"
 	"github.com/leehai1107/chophimco-server/pkg/logger"
+	"github.com/leehai1107/chophimco-server/pkg/middleware/auth"
 	"github.com/leehai1107/chophimco-server/service/chophimco/model/request"
 )
 
@@ -58,8 +59,12 @@ func (h *Handler) CreateSellerProfile(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: Get user ID from JWT token
-	userID := ctx.GetInt("user_id")
+	// Get user ID from JWT token
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 	req.UserID = userID
 
 	profile, err := h.sellerUsecase.CreateSellerProfile(ctx, req)
@@ -80,7 +85,11 @@ func (h *Handler) CreateSellerProfile(ctx *gin.Context) {
 // @Success 200 {object} apiwrapper.APIResponse
 // @Router /api/v1/seller/profile [get]
 func (h *Handler) GetSellerProfile(ctx *gin.Context) {
-	userID := ctx.GetInt("user_id")
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 
 	profile, err := h.sellerUsecase.GetSellerProfileByUserID(ctx, userID)
 	if err != nil {
@@ -107,7 +116,11 @@ func (h *Handler) UpdateSellerProfile(ctx *gin.Context) {
 		return
 	}
 
-	userID := ctx.GetInt("user_id")
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 	req.UserID = userID
 
 	profile, err := h.sellerUsecase.UpdateSellerProfile(ctx, req)
@@ -160,7 +173,11 @@ func (h *Handler) CreateSellerProduct(ctx *gin.Context) {
 		return
 	}
 
-	userID := ctx.GetInt("user_id")
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 	req.SellerID = userID
 
 	product, err := h.sellerUsecase.CreateProduct(ctx, req)
@@ -181,7 +198,11 @@ func (h *Handler) CreateSellerProduct(ctx *gin.Context) {
 // @Success 200 {object} apiwrapper.APIResponse
 // @Router /api/v1/seller/product [get]
 func (h *Handler) GetSellerProducts(ctx *gin.Context) {
-	userID := ctx.GetInt("user_id")
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 
 	products, err := h.sellerUsecase.GetProductsBySeller(ctx, userID)
 	if err != nil {
@@ -209,7 +230,11 @@ func (h *Handler) UpdateSellerProduct(ctx *gin.Context) {
 		return
 	}
 
-	userID := ctx.GetInt("user_id")
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 
 	product, err := h.sellerUsecase.UpdateProduct(ctx, userID, req)
 	if err != nil {
@@ -236,7 +261,11 @@ func (h *Handler) DeleteSellerProduct(ctx *gin.Context) {
 		return
 	}
 
-	userID := ctx.GetInt("user_id")
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 
 	err = h.sellerUsecase.DeleteProduct(ctx, userID, productID)
 	if err != nil {
@@ -267,7 +296,11 @@ func (h *Handler) UploadProductImage(ctx *gin.Context) {
 		return
 	}
 
-	userID := ctx.GetInt("user_id")
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 
 	image, err := h.sellerUsecase.UploadProductImage(ctx, userID, req)
 	if err != nil {
@@ -294,7 +327,11 @@ func (h *Handler) DeleteProductImage(ctx *gin.Context) {
 		return
 	}
 
-	userID := ctx.GetInt("user_id")
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 
 	err = h.sellerUsecase.DeleteProductImage(ctx, userID, imageID)
 	if err != nil {
@@ -322,10 +359,13 @@ func (h *Handler) SetPrimaryImage(ctx *gin.Context) {
 		return
 	}
 
-	userID := ctx.GetInt("user_id")
-
-	err := h.sellerUsecase.SetPrimaryImage(ctx, userID, req)
+	userID, err := auth.GetUserIDFromContext(ctx)
 	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
+
+	if err = h.sellerUsecase.SetPrimaryImage(ctx, userID, req); err != nil {
 		logger.EnhanceWith(ctx).Errorw("Failed to set primary image", "error", err)
 		apiwrapper.SendInternalError(ctx, "Failed to set primary image")
 		return
@@ -515,7 +555,11 @@ func (h *Handler) CreateSellerReview(ctx *gin.Context) {
 		return
 	}
 
-	userID := ctx.GetInt("user_id")
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 	req.BuyerID = userID
 
 	review, err := h.sellerUsecase.CreateSellerReview(ctx, req)

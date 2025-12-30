@@ -35,6 +35,8 @@ type ServerCfg struct {
 	GinMode        string `envconfig:"GIN_MODE" default:"debug"`
 	Logger         bool   `envconfig:"LOGGER" default:"false"`
 	CorsProduction bool   `envconfig:"CORS_PRODUCTION" default:"false"`
+	JWTSecret      string `envconfig:"JWT_SECRET" default:"your-secret-key-change-this-in-production"`
+	JWTExpiration  int    `envconfig:"JWT_EXPIRATION" default:"24"` // hours
 }
 
 type ServicesCfg struct{}

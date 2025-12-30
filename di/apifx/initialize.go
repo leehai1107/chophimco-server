@@ -1,6 +1,7 @@
 package apifx
 
 import (
+	"github.com/leehai1107/chophimco-server/pkg/middleware/auth"
 	"github.com/leehai1107/chophimco-server/service/chophimco/delivery/http"
 	"github.com/leehai1107/chophimco-server/service/chophimco/repository"
 	"github.com/leehai1107/chophimco-server/service/chophimco/usecase"
@@ -11,6 +12,7 @@ import (
 var Module = fx.Provide(
 	provideRouter,
 	provideHandler,
+	provideJWTService,
 
 	// Repositories
 	provideUserRepo,
@@ -32,8 +34,12 @@ var Module = fx.Provide(
 	provideSellerUsecase,
 )
 
-func provideRouter(handler http.IHandler) http.Router {
-	return http.NewRouter(handler)
+func provideRouter(handler http.IHandler, jwtService auth.IJWTService) http.Router {
+	return http.NewRouter(handler, jwtService)
+}
+
+func provideJWTService() auth.IJWTService {
+	return auth.NewJWTService()
 }
 
 func provideHandler(
@@ -91,8 +97,8 @@ func provideSellerRepo(db *gorm.DB) repository.ISellerRepository {
 }
 
 // Usecase providers
-func provideUserUsecase(repo repository.IUserRepo) usecase.IUserUsecase {
-	return usecase.NewUserUsecase(repo)
+func provideUserUsecase(repo repository.IUserRepo, jwtService auth.IJWTService) usecase.IUserUsecase {
+	return usecase.NewUserUsecase(repo, jwtService)
 }
 
 func provideProductUsecase(repo repository.IProductRepo) usecase.IProductUsecase {

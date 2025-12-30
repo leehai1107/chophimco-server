@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/leehai1107/chophimco-server/pkg/apiwrapper"
+	"github.com/leehai1107/chophimco-server/pkg/middleware/auth"
 	"github.com/leehai1107/chophimco-server/service/chophimco/model/request"
 )
 
@@ -24,8 +25,11 @@ type ICartHandler interface {
 // @Success 200 {object} apiwrapper.APIResponse
 // @Router /api/v1/cart [get]
 func (h *Handler) GetCart(ctx *gin.Context) {
-	userIDStr := ctx.GetString("user_id")
-	userID, _ := strconv.Atoi(userIDStr)
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 
 	cart, err := h.cartUsecase.GetCart(ctx, userID)
 	if err != nil {
@@ -46,8 +50,11 @@ func (h *Handler) GetCart(ctx *gin.Context) {
 // @Success 200 {object} apiwrapper.APIResponse
 // @Router /api/v1/cart/add [post]
 func (h *Handler) AddToCart(ctx *gin.Context) {
-	userIDStr := ctx.GetString("user_id")
-	userID, _ := strconv.Atoi(userIDStr)
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 
 	var req request.AddToCart
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -116,8 +123,11 @@ func (h *Handler) RemoveFromCart(ctx *gin.Context) {
 // @Success 200 {object} apiwrapper.APIResponse
 // @Router /api/v1/cart/clear [delete]
 func (h *Handler) ClearCart(ctx *gin.Context) {
-	userIDStr := ctx.GetString("user_id")
-	userID, _ := strconv.Atoi(userIDStr)
+	userID, err := auth.GetUserIDFromContext(ctx)
+	if err != nil {
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
+		return
+	}
 
 	if err := h.cartUsecase.ClearCart(ctx, userID); err != nil {
 		apiwrapper.SendInternalError(ctx, "Failed to clear cart")

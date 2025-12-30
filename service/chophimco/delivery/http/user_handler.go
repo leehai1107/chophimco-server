@@ -1,11 +1,10 @@
 package http
 
 import (
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/leehai1107/chophimco-server/pkg/apiwrapper"
 	"github.com/leehai1107/chophimco-server/pkg/logger"
+	"github.com/leehai1107/chophimco-server/pkg/middleware/auth"
 	"github.com/leehai1107/chophimco-server/service/chophimco/model/request"
 )
 
@@ -87,16 +86,10 @@ func (h *Handler) Register(ctx *gin.Context) {
 // @Failure 401 {object} apiwrapper.APIResponse
 // @Router /api/v1/user/profile [get]
 func (h *Handler) GetProfile(ctx *gin.Context) {
-	// Get user ID from context (should be set by auth middleware)
-	userIDStr := ctx.GetString("user_id")
-	if userIDStr == "" {
-		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
-		return
-	}
-
-	userID, err := strconv.Atoi(userIDStr)
+	// Get user ID from context (set by auth middleware)
+	userID, err := auth.GetUserIDFromContext(ctx)
 	if err != nil {
-		apiwrapper.SendBadRequest(ctx, "Invalid user ID")
+		apiwrapper.SendUnauthorized(ctx, "Unauthorized")
 		return
 	}
 
